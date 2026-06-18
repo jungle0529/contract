@@ -7,6 +7,9 @@ export default function Filters({
   status,
   setStatus,
   statuses,
+  year,
+  setYear,
+  years,
 }) {
   return (
     <section className="filters">
@@ -17,6 +20,13 @@ export default function Filters({
         value={query}
         onChange={(e) => setQuery(e.target.value)}
       />
+      <select className="select" value={year} onChange={(e) => setYear(e.target.value)}>
+        {years.map((y) => (
+          <option key={y} value={y}>
+            연도: {y}
+          </option>
+        ))}
+      </select>
       <select className="select" value={owner} onChange={(e) => setOwner(e.target.value)}>
         {owners.map((o) => (
           <option key={o} value={o}>

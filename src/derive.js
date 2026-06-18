@@ -39,11 +39,19 @@ export function classify(raw, stage = {}) {
   return 'done'
 }
 
+// 스프레드시트 컬럼 문자(A, B, ... W, AA ...)를 0-based 인덱스로 변환
+function colLetterToIndex(letter) {
+  let n = 0
+  for (const ch of letter.toUpperCase()) n = n * 26 + (ch.charCodeAt(0) - 64)
+  return n - 1
+}
+
 // 헤더 기준으로 META/스테이지 컬럼 인덱스를 1회 해석해 둔다.
+// META 정의에 col(컬럼 문자)이 있으면 위치로, 없으면 헤더명으로 찾는다.
 export function buildColumnMap(header) {
   const meta = {}
   for (const [k, def] of Object.entries(META)) {
-    meta[k] = resolveIndex(header, def.match)
+    meta[k] = def.col ? colLetterToIndex(def.col) : resolveIndex(header, def.match)
   }
   const stages = {}
   for (const st of ALL_STAGES) {
@@ -76,6 +84,7 @@ export function toProject(row, colMap) {
     name: cell(row, colMap.meta.name),
     status: cell(row, colMap.meta.status),
     owner: cell(row, colMap.meta.owner),
+    year: cell(row, colMap.meta.year),
     stages,
     progress,
     done,
