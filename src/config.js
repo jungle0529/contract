@@ -51,18 +51,10 @@ export const META = {
 // ─────────────────────────────────────────────────────────────
 export const GROUPS = [
   {
-    key: 'quote',
-    label: '견적서',
-    stages: [
-      { key: 'q_issue', label: '발행', match: ['견적서(link)', '견적서link'], rule: 'fill' },
-    ],
-  },
-  {
     key: 'contract',
     label: '계약',
     stages: [
       { key: 'c_draft', label: '기안', match: ['계약기안'], rule: 'token' },
-      { key: 'c_seal', label: '날인', match: ['계약날인'], rule: 'token', done: ['완료'], no: ['발송'] },
     ],
   },
   {
@@ -72,14 +64,6 @@ export const GROUPS = [
       { key: 'i_pre', label: '선금', match: ['상태(선금)', '선금상태'], rule: 'token', no: ['보류'] },
       { key: 'i_mid', label: '중도금', match: ['상태(중도금)', '중도금상태'], rule: 'token', no: ['보류'] },
       { key: 'i_bal', label: '잔금', match: ['상태(잔금)', '잔금상태'], rule: 'token', no: ['예정', '보류'] },
-    ],
-  },
-  {
-    key: 'project',
-    label: '프로젝트진행',
-    stages: [
-      { key: 'p_start', label: '시작', match: ['프로젝트진행상황'], rule: 'token', no: ['작업전'] },
-      { key: 'p_done', label: '완료', match: ['프로젝트완료일'], rule: 'token' },
     ],
   },
   {

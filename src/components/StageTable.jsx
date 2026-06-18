@@ -31,7 +31,6 @@ export default function StageTable({ projects }) {
                 {g.label}
               </th>
             ))}
-            <th rowSpan={2}>진행율</th>
           </tr>
           <tr className="sub-row">
             {GROUPS.flatMap((g) =>
@@ -57,12 +56,6 @@ export default function StageTable({ projects }) {
                   </td>
                 )),
               )}
-              <td className="progress">
-                <div className="bar">
-                  <div className="bar-fill" style={{ width: `${p.progress}%` }} />
-                </div>
-                <span className="pct">{p.progress}%</span>
-              </td>
             </tr>
           ))}
         </tbody>
