@@ -64,6 +64,14 @@ function cell(row, idx) {
   return idx >= 0 && idx < row.length ? (row[idx] || '').trim() : ''
 }
 
+// 통화 문자열 → 숫자 ("", "-" 는 0)
+function money(raw) {
+  const v = (raw || '').trim()
+  if (v === '' || v === '-') return 0
+  const n = parseFloat(v.replace(/[^0-9.\-]/g, ''))
+  return isNaN(n) ? 0 : n
+}
+
 // 한 행 → 프로젝트 객체
 export function toProject(row, colMap) {
   const stages = {}
@@ -79,6 +87,13 @@ export function toProject(row, colMap) {
 
   const progress = applicable > 0 ? Math.round((done / applicable) * 1000) / 10 : 0
 
+  // 매출금액 회수율 = 회수액 / (회수액 + 미발행 + 미수채권)
+  const collected = money(cell(row, colMap.meta.recvCollected))
+  const notIssued = money(cell(row, colMap.meta.recvNotIssued))
+  const unpaid = money(cell(row, colMap.meta.recvUnpaid))
+  const denom = collected + notIssued + unpaid
+  const recoveryRate = denom > 0 ? Math.round((collected / denom) * 1000) / 10 : null
+
   return {
     code: cell(row, colMap.meta.code),
     name: cell(row, colMap.meta.name),
@@ -86,6 +101,9 @@ export function toProject(row, colMap) {
     owner: cell(row, colMap.meta.owner),
     category: cell(row, colMap.meta.category),
     year: cell(row, colMap.meta.year),
+    amount: cell(row, colMap.meta.amount),
+    draft: cell(row, colMap.meta.draft),
+    recoveryRate,
     stages,
     progress,
     done,

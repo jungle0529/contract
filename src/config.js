@@ -24,6 +24,16 @@ export const META = {
   category: { label: '구분', match: ['대분류'] },
   // 매출 탭 W열의 연도. 헤더가 비어 있어 컬럼 위치(letter)로 지정한다.
   year: { label: '연도', col: 'W' },
+
+  // 계약금(AD열, 총 계약금). 대외비 금액이라 화면 노출은 SHOW_AMOUNTS 플래그로 제어.
+  amount: { label: '계약금', col: 'AD' },
+  // 계약링크: 계약기안 셀의 표시텍스트(실제 URL 아님)
+  draft: { label: '계약링크', match: ['계약기안'] },
+
+  // 매출금액 회수율 산정용 (CB=회수액, CC=세금계산서 미발행, CD=미수채권)
+  recvCollected: { label: '회수액', col: 'CB' },
+  recvNotIssued: { label: '미발행', col: 'CC' },
+  recvUnpaid: { label: '미수채권', col: 'CD' },
 }
 
 // ─────────────────────────────────────────────────────────────

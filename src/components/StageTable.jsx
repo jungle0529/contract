@@ -1,5 +1,9 @@
 import { GROUPS } from '../config.js'
 
+// 계약금(대외비 금액) 노출 여부. 공개 빌드는 false → 표시 안 함.
+// 인증 호스팅에서 빌드 시 VITE_SHOW_AMOUNTS=true 로 켠다.
+const SHOW_AMOUNTS = import.meta.env.VITE_SHOW_AMOUNTS === 'true'
+
 const MARK = {
   done: { t: 'O', cls: 'm-done' },
   no: { t: 'X', cls: 'm-no' },
@@ -10,6 +14,19 @@ const MARK = {
 function Mark({ status }) {
   const m = MARK[status] || MARK.pending
   return <span className={`mark ${m.cls}`}>{m.t}</span>
+}
+
+// 회수율 셀 (없으면 '-')
+function Recovery({ rate }) {
+  if (rate == null) return <span className="pct muted">-</span>
+  return (
+    <>
+      <div className="bar">
+        <div className="bar-fill" style={{ width: `${rate}%` }} />
+      </div>
+      <span className="pct">{rate}%</span>
+    </>
+  )
 }
 
 export default function StageTable({ projects }) {
@@ -31,6 +48,9 @@ export default function StageTable({ projects }) {
                 {g.label}
               </th>
             ))}
+            <th rowSpan={2}>매출 회수율</th>
+            {SHOW_AMOUNTS && <th rowSpan={2}>계약금</th>}
+            <th rowSpan={2}>계약링크</th>
           </tr>
           <tr className="sub-row">
             {GROUPS.flatMap((g) =>
@@ -56,6 +76,11 @@ export default function StageTable({ projects }) {
                   </td>
                 )),
               )}
+              <td className="progress">
+                <Recovery rate={p.recoveryRate} />
+              </td>
+              {SHOW_AMOUNTS && <td className="amount">{p.amount || '-'}</td>}
+              <td className="draft">{p.draft || '-'}</td>
             </tr>
           ))}
         </tbody>
