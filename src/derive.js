@@ -84,6 +84,7 @@ export function toProject(row, colMap) {
     name: cell(row, colMap.meta.name),
     status: cell(row, colMap.meta.status),
     owner: cell(row, colMap.meta.owner),
+    category: cell(row, colMap.meta.category),
     year: cell(row, colMap.meta.year),
     stages,
     progress,

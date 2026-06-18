@@ -10,6 +10,9 @@ export default function Filters({
   year,
   setYear,
   years,
+  category,
+  setCategory,
+  categories,
 }) {
   return (
     <section className="filters">
@@ -24,6 +27,13 @@ export default function Filters({
         {years.map((y) => (
           <option key={y} value={y}>
             연도: {y}
+          </option>
+        ))}
+      </select>
+      <select className="select" value={category} onChange={(e) => setCategory(e.target.value)}>
+        {categories.map((c) => (
+          <option key={c} value={c}>
+            구분: {c}
           </option>
         ))}
       </select>

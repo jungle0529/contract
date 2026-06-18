@@ -15,6 +15,7 @@ export default function App() {
   const [owner, setOwner] = useState('전체')
   const [status, setStatus] = useState('전체')
   const [year, setYear] = useState('전체')
+  const [category, setCategory] = useState('전체')
 
   async function load() {
     setLoading(true)
@@ -42,6 +43,10 @@ export default function App() {
     () => ['전체', ...Array.from(new Set(projects.map((p) => p.status).filter(Boolean))).sort()],
     [projects],
   )
+  const categories = useMemo(
+    () => ['전체', ...Array.from(new Set(projects.map((p) => p.category).filter(Boolean))).sort()],
+    [projects],
+  )
   // 연도는 최신순(내림차순) 정렬
   const years = useMemo(
     () => [
@@ -57,12 +62,13 @@ export default function App() {
     const q = query.trim().toLowerCase()
     return projects.filter((p) => {
       if (year !== '전체' && p.year !== year) return false
+      if (category !== '전체' && p.category !== category) return false
       if (owner !== '전체' && p.owner !== owner) return false
       if (status !== '전체' && p.status !== status) return false
       if (q && !`${p.code} ${p.name}`.toLowerCase().includes(q)) return false
       return true
     })
-  }, [projects, query, owner, status, year])
+  }, [projects, query, owner, status, year, category])
 
   return (
     <div className="app">
@@ -107,6 +113,9 @@ export default function App() {
             year={year}
             setYear={setYear}
             years={years}
+            category={category}
+            setCategory={setCategory}
+            categories={categories}
           />
           {loading && projects.length === 0 ? (
             <div className="placeholder">불러오는 중…</div>
