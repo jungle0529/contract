@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { fetchSheet } from './sheet.js'
 import { toProjects } from './derive.js'
-import Summary from './components/Summary.jsx'
 import Filters from './components/Filters.jsx'
 import StageTable from './components/StageTable.jsx'
 
@@ -100,7 +99,6 @@ export default function App() {
 
       {!error && (
         <>
-          <Summary projects={projects} filtered={filtered} />
           <Filters
             query={query}
             setQuery={setQuery}
