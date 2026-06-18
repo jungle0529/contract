@@ -122,12 +122,22 @@ body {
 .stage-table thead th {
   position: sticky;
   top: 0;
+  height: 34px;
   background: #f1f3f6;
   font-weight: 600;
   font-size: 12px;
-  z-index: 2;
+  z-index: 3; /* 헤더가 본문 위에 오도록 (본문 고정셀 z-index 2보다 높게) */
 }
 .stage-table thead .sub-row th { top: 34px; }
+/* 좌측 고정 헤더(코너): 헤더 일반셀(3)·본문 고정셀(2)보다 위.
+   .stage-table 접두사로 우선순위를 thead th 규칙보다 높여 z-index가 적용되게 함 */
+.stage-table thead .sticky-col,
+.stage-table thead .sticky-col2,
+.stage-table thead .sticky-col3,
+.stage-table thead .sticky-col4 {
+  z-index: 4;
+  background: #f1f3f6;
+}
 
 .grp-quote { background: #fff7e6 !important; }
 .grp-contract { background: #eef4ff !important; }
@@ -143,7 +153,7 @@ body {
 .sticky-col, .sticky-col2, .sticky-col3, .sticky-col4 {
   position: sticky;
   background: var(--panel);
-  z-index: 3;
+  z-index: 2;
 }
 .sticky-col { left: 0; width: 130px; min-width: 130px; max-width: 130px; }
 .sticky-col2 { left: 130px; width: 260px; min-width: 260px; max-width: 260px; }
@@ -154,10 +164,6 @@ body {
   min-width: 72px;
   max-width: 72px;
   box-shadow: 2px 0 0 var(--line); /* 고정 블록 우측 경계 */
-}
-thead .sticky-col, thead .sticky-col2, thead .sticky-col3, thead .sticky-col4 {
-  z-index: 4;
-  background: #f1f3f6;
 }
 
 .code {
