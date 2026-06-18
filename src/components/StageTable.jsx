@@ -1,8 +1,12 @@
+import { Fragment } from 'react'
 import { GROUPS } from '../config.js'
 
 // 계약금(대외비 금액) 노출 여부. 공개 빌드는 false → 표시 안 함.
 // 인증 호스팅에서 빌드 시 VITE_SHOW_AMOUNTS=true 로 켠다.
 const SHOW_AMOUNTS = import.meta.env.VITE_SHOW_AMOUNTS === 'true'
+
+// 계약링크 컬럼을 어느 그룹 오른쪽에 둘지
+const DRAFT_AFTER = 'contract'
 
 const MARK = {
   done: { t: 'O', cls: 'm-done' },
@@ -29,6 +33,17 @@ function Recovery({ rate }) {
   )
 }
 
+function DraftCell({ project }) {
+  if (project.draftUrl) {
+    return (
+      <a href={project.draftUrl} target="_blank" rel="noreferrer">
+        {project.draft || '바로가기'}
+      </a>
+    )
+  }
+  return project.draft || '-'
+}
+
 export default function StageTable({ projects }) {
   if (projects.length === 0) {
     return <div className="placeholder">표시할 프로젝트가 없습니다.</div>
@@ -44,13 +59,15 @@ export default function StageTable({ projects }) {
             <th rowSpan={2}>진행상황</th>
             <th rowSpan={2}>담당자</th>
             {GROUPS.map((g) => (
-              <th key={g.key} colSpan={g.stages.length} className={`grp grp-${g.key}`}>
-                {g.label}
-              </th>
+              <Fragment key={g.key}>
+                <th colSpan={g.stages.length} className={`grp grp-${g.key}`}>
+                  {g.label}
+                </th>
+                {g.key === DRAFT_AFTER && <th rowSpan={2}>계약링크</th>}
+              </Fragment>
             ))}
             <th rowSpan={2}>매출 회수율</th>
             {SHOW_AMOUNTS && <th rowSpan={2}>계약금</th>}
-            <th rowSpan={2}>계약링크</th>
           </tr>
           <tr className="sub-row">
             {GROUPS.flatMap((g) =>
@@ -69,26 +86,24 @@ export default function StageTable({ projects }) {
               <td className="sticky-col2 left name" title={p.name}>{p.name}</td>
               <td className="status">{p.status}</td>
               <td className="owner">{p.owner}</td>
-              {GROUPS.flatMap((g) =>
-                g.stages.map((s) => (
-                  <td key={s.key} className="cell">
-                    <Mark status={p.stages[s.key]} />
-                  </td>
-                )),
-              )}
+              {GROUPS.map((g) => (
+                <Fragment key={g.key}>
+                  {g.stages.map((s) => (
+                    <td key={s.key} className="cell">
+                      <Mark status={p.stages[s.key]} />
+                    </td>
+                  ))}
+                  {g.key === DRAFT_AFTER && (
+                    <td className="draft">
+                      <DraftCell project={p} />
+                    </td>
+                  )}
+                </Fragment>
+              ))}
               <td className="progress">
                 <Recovery rate={p.recoveryRate} />
               </td>
               {SHOW_AMOUNTS && <td className="amount">{p.amount || '-'}</td>}
-              <td className="draft">
-                {p.draftUrl ? (
-                  <a href={p.draftUrl} target="_blank" rel="noreferrer">
-                    {p.draft || '바로가기'}
-                  </a>
-                ) : (
-                  p.draft || '-'
-                )}
-              </td>
             </tr>
           ))}
         </tbody>
