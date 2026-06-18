@@ -22,7 +22,9 @@ export const APPS_SCRIPT_URL =
 
 // 프로젝트 식별/메타 컬럼. match 는 시트 헤더명에 대한 후보(부분일치) 목록.
 export const META = {
-  code: { label: '코드', match: ['견적코드'] },
+  // 행 식별/필터용(견적코드). 화면 표시는 displayCode(계약코드, S열) 사용.
+  code: { label: '견적코드', match: ['견적코드'] },
+  displayCode: { label: '코드', col: 'S' },
   name: { label: '프로젝트명', match: ['프로젝트명'] },
   status: { label: '진행상황', match: ['계약상태'] },
   owner: { label: '담당자', match: ['사업부 담당자', '사업부담당자', '담당자'] },

@@ -96,6 +96,7 @@ export function toProject(row, colMap, draftUrl = '') {
 
   return {
     code: cell(row, colMap.meta.code),
+    displayCode: cell(row, colMap.meta.displayCode),
     name: cell(row, colMap.meta.name),
     status: cell(row, colMap.meta.status),
     owner: cell(row, colMap.meta.owner),

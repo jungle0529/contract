@@ -82,7 +82,7 @@ export default function StageTable({ projects }) {
         <tbody>
           {projects.map((p, i) => (
             <tr key={`${p.code}-${i}`}>
-              <td className="sticky-col code">{p.code}</td>
+              <td className="sticky-col code">{p.displayCode || '-'}</td>
               <td className="sticky-col2 left name" title={p.name}>{p.name}</td>
               <td className="status">{p.status}</td>
               <td className="owner">{p.owner}</td>
