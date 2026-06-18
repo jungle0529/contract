@@ -14,6 +14,8 @@
 
 * { box-sizing: border-box; }
 
+html, body { height: 100%; }
+
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Apple SD Gothic Neo',
@@ -21,9 +23,18 @@ body {
   background: var(--bg);
   color: var(--text);
   font-size: 14px;
+  overflow: hidden; /* 세로 스크롤은 표 영역 안에서만 → 헤더 고정 유지 */
 }
 
-.app { max-width: 1500px; margin: 0 auto; padding: 24px; }
+.app {
+  max-width: 1500px;
+  margin: 0 auto;
+  padding: 24px;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+.topbar, .summary, .filters, .error { flex-shrink: 0; }
 
 .topbar {
   display: flex;
@@ -97,7 +108,8 @@ body {
   border: 1px solid var(--line);
   border-radius: 12px;
   overflow: auto;
-  max-height: 78vh;
+  flex: 1;        /* 남은 높이를 채우고 */
+  min-height: 0;  /* 내부 스크롤이 동작하도록 */
 }
 
 .stage-table { border-collapse: separate; border-spacing: 0; width: 100%; white-space: nowrap; }
