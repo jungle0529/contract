@@ -17,7 +17,8 @@ export const GID = '0'
 // Apps Script 웹앱 URL(.../exec). 설정하면 데이터와 함께 계약기안 링크 URL을 읽어온다.
 // 비워두면 gviz CSV 로 읽고 계약링크는 텍스트만 표시.
 // 페이지 URL ?api=<웹앱URL> 로도 덮어쓸 수 있다.
-export const APPS_SCRIPT_URL = ''
+export const APPS_SCRIPT_URL =
+  'https://script.google.com/macros/s/AKfycbwMTPEG-T1-em0FOPURu3iQhFHMKq_DJ9bapAGwTPie6pf1tEut7qPU_JZ2ZCrc-nKrrA/exec'
 
 // 프로젝트 식별/메타 컬럼. match 는 시트 헤더명에 대한 후보(부분일치) 목록.
 export const META = {
