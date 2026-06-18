@@ -2,7 +2,7 @@
 // 화면에는 단계 체크와 진행율만 노출하므로, 금액/고객사 등 대외비 값은
 // 여기서 의도적으로 추출/보관하지 않는다.
 
-import { GROUPS, ALL_STAGES, META } from './config.js'
+import { GROUPS, ALL_STAGES, META, BUY_META, BUY_STAGES } from './config.js'
 import { resolveIndex } from './sheet.js'
 
 const norm = (s) => (s || '').toString().replace(/\s+/g, '').toLowerCase()
@@ -121,6 +121,56 @@ export function toProjects(header, rows, draftUrls = []) {
   return rows
     .map((r, i) => toProject(r, colMap, draftUrls[i]))
     .filter((p) => (hasCodeCol ? p.code : p.name))
+}
+
+// ── 매입(purchase) ──────────────────────────────────────────
+
+// col(컬럼문자) 또는 match(헤더명)로 인덱스 해석
+function defIndex(header, def) {
+  return def.col ? colLetterToIndex(def.col) : resolveIndex(header, def.match)
+}
+
+// 매입 행들 → 매입 객체 배열
+export function toBuyRows(header, rows, draftUrls = []) {
+  const meta = {}
+  for (const [k, d] of Object.entries(BUY_META)) meta[k] = defIndex(header, d)
+  const stageIdx = {}
+  for (const st of BUY_STAGES) stageIdx[st.key] = resolveIndex(header, st.match)
+
+  const out = []
+  rows.forEach((r, i) => {
+    const code = cell(r, meta.code)
+    if (!code) return
+    const stages = {}
+    for (const st of BUY_STAGES) stages[st.key] = classify(cell(r, stageIdx[st.key]), st)
+
+    const amt = money(cell(r, meta.payAmt))
+    const remain = money(cell(r, meta.payRemain))
+    const denom = amt + remain
+    const payRate = denom > 0 ? Math.round((amt / denom) * 1000) / 10 : null
+
+    out.push({
+      code,
+      buyCode: cell(r, meta.buyCode),
+      item: cell(r, meta.item),
+      vendor: cell(r, meta.vendor),
+      draft: cell(r, meta.draft),
+      draftUrl: draftUrls[i] || '',
+      stages,
+      payRate,
+    })
+  })
+  return out
+}
+
+// 매입 객체 배열 → 계약코드별 그룹 Map
+export function groupBuyByCode(buyRows) {
+  const m = new Map()
+  for (const b of buyRows) {
+    if (!m.has(b.code)) m.set(b.code, [])
+    m.get(b.code).push(b)
+  }
+  return m
 }
 
 export { GROUPS }

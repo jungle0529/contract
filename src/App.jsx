@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { fetchSheet } from './sheet.js'
-import { toProjects } from './derive.js'
+import { toProjects, toBuyRows, groupBuyByCode } from './derive.js'
 import Filters from './components/Filters.jsx'
 import StageTable from './components/StageTable.jsx'
 
@@ -20,8 +20,14 @@ export default function App() {
     setLoading(true)
     setError(null)
     try {
-      const { header, rows, draftUrls } = await fetchSheet()
-      setProjects(toProjects(header, rows, draftUrls))
+      const { header, rows, draftUrls, buy } = await fetchSheet()
+      const list = toProjects(header, rows, draftUrls)
+      // 매입을 계약코드별로 묶어 해당 매출(계약코드=displayCode) 아래에 붙인다
+      const buyMap = buy
+        ? groupBuyByCode(toBuyRows(buy.header, buy.rows, buy.draftUrls))
+        : new Map()
+      for (const p of list) p.children = buyMap.get(p.displayCode) || []
+      setProjects(list)
       setUpdatedAt(new Date())
     } catch (e) {
       setError(e.message || String(e))

@@ -102,3 +102,41 @@ export const GROUPS = [
 
 // 모든 단계를 평탄화한 목록 (진행율 계산/렌더링용)
 export const ALL_STAGES = GROUPS.flatMap((g) => g.stages)
+
+// ─────────────────────────────────────────────────────────────
+// 매입(purchase) 탭
+//   - 조인 키: 매입 계약코드(A열) == 매출 계약코드(S열, 화면 "코드")
+//   - 한 계약코드에 매입행 여러 개(1:N) → 매출 행 아래로 펼쳐서 표시
+//   - 지급율 = 지급액(AN) / (지급액(AN) + 잔여(AO))
+// ─────────────────────────────────────────────────────────────
+export const BUY_GID = '1237292122'
+
+export const BUY_META = {
+  code: { label: '계약코드', col: 'A' }, // 조인 키
+  buyCode: { label: '매입코드', col: 'I' },
+  item: { label: '품목', col: 'K' },
+  vendor: { label: '업체', col: 'L' },
+  draft: { label: '계약', match: ['계약기안'] }, // 계약 상태 + 계약링크 소스
+  payAmt: { label: '지급액', col: 'AN' },
+  payRemain: { label: '잔여', col: 'AO' },
+}
+
+// 매입 하위 표의 단계 (지급요청서 = 선·중·잔 지급상태)
+export const BUY_GROUPS = [
+  {
+    key: 'b_contract',
+    label: '계약',
+    stages: [{ key: 'b_draft', label: '기안', match: ['계약기안'], rule: 'token' }],
+  },
+  {
+    key: 'b_pay',
+    label: '지급요청서',
+    stages: [
+      { key: 'b_pre', label: '선금', match: ['상태(선금)', '선금상태'], rule: 'token', done: ['완료', '요청'], no: ['예정'] },
+      { key: 'b_mid', label: '중도금', match: ['상태(중도금)', '중도금상태'], rule: 'token', done: ['완료', '요청'], no: ['예정'] },
+      { key: 'b_bal', label: '잔금', match: ['상태(잔금)', '잔금상태'], rule: 'token', done: ['완료', '요청'], no: ['예정'] },
+    ],
+  },
+]
+
+export const BUY_STAGES = BUY_GROUPS.flatMap((g) => g.stages)
