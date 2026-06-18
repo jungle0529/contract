@@ -126,12 +126,30 @@ body {
 
 .left { text-align: left !important; }
 .sticky-col, .sticky-col2 { position: sticky; background: var(--panel); z-index: 3; }
-.sticky-col { left: 0; }
-.sticky-col2 { left: 88px; }
+/* 코드 열: 고정 너비 → 프로젝트명 열 오프셋과 일치시켜 겹침 방지 */
+.sticky-col {
+  left: 0;
+  width: 150px;
+  min-width: 150px;
+  max-width: 150px;
+}
+.sticky-col2 { left: 150px; }
 thead .sticky-col, thead .sticky-col2 { z-index: 4; background: #f1f3f6; }
 
-.code { font-variant-numeric: tabular-nums; color: var(--muted); font-size: 12px; }
-.name { max-width: 280px; overflow: hidden; text-overflow: ellipsis; }
+.code {
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
+  font-size: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.name {
+  max-width: 280px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 .status, .owner { font-size: 12px; color: #4a505c; }
 
 tbody tr:hover td { background: #f8fafc; }
