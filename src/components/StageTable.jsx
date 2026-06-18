@@ -47,14 +47,23 @@ function LinkCell({ url, text }) {
   return text || '-'
 }
 
-// 매입 하위 표
+// 매입 하위 표 (모든 인스턴스 동일 폭: table-layout fixed + colgroup)
 function BuyTable({ rows }) {
   return (
     <table className="buy-table">
+      <colgroup>
+        <col style={{ width: '120px' }} />
+        <col style={{ width: '260px' }} />
+        <col style={{ width: '64px' }} />
+        <col style={{ width: '90px' }} />
+        <col style={{ width: '64px' }} />
+        <col style={{ width: '64px' }} />
+        <col style={{ width: '64px' }} />
+        <col style={{ width: '150px' }} />
+      </colgroup>
       <thead>
         <tr>
           <th rowSpan={2}>매입코드</th>
-          <th rowSpan={2} className="left">품목</th>
           <th rowSpan={2} className="left">업체</th>
           <th rowSpan={2}>계약</th>
           <th rowSpan={2}>계약링크</th>
@@ -71,8 +80,7 @@ function BuyTable({ rows }) {
         {rows.map((b, i) => (
           <tr key={`${b.buyCode}-${i}`}>
             <td className="code">{b.buyCode || '-'}</td>
-            <td className="left">{b.item || '-'}</td>
-            <td className="left">{b.vendor || '-'}</td>
+            <td className="left" title={b.vendor}>{b.vendor || '-'}</td>
             <td className="cell"><Mark status={b.stages.b_draft} /></td>
             <td className="draft"><LinkCell url={b.draftUrl} text={b.draft} /></td>
             <td className="cell"><Mark status={b.stages.b_pre} /></td>

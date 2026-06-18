@@ -239,6 +239,7 @@ tbody tr:hover .sticky-col4 { background: #f8fafc; }
 .buy-table {
   border-collapse: separate;
   border-spacing: 0;
+  table-layout: fixed; /* colgroup 폭 고정 → 모든 펼침 표 동일 너비 */
   background: var(--panel);
   border: 1px solid var(--line);
   border-radius: 8px;
@@ -254,5 +255,10 @@ tbody tr:hover .sticky-col4 { background: #f8fafc; }
 }
 .buy-table thead th { background: #eef1f5; font-weight: 600; }
 .buy-table tbody tr:last-child td { border-bottom: none; }
-.buy-table .left { text-align: left; max-width: 240px; overflow: hidden; text-overflow: ellipsis; }
-.buy-table .progress { min-width: 110px; }
+.buy-table .left {
+  text-align: left;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.buy-table .progress { min-width: 0; }
