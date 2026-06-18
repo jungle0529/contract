@@ -56,8 +56,8 @@ export default function StageTable({ projects }) {
           <tr className="group-row">
             <th className="sticky-col" rowSpan={2}>코드</th>
             <th className="sticky-col2 left" rowSpan={2}>프로젝트명</th>
-            <th rowSpan={2}>진행상황</th>
-            <th rowSpan={2}>담당자</th>
+            <th className="sticky-col3" rowSpan={2}>진행상황</th>
+            <th className="sticky-col4" rowSpan={2}>담당자</th>
             {GROUPS.map((g) => (
               <Fragment key={g.key}>
                 <th colSpan={g.stages.length} className={`grp grp-${g.key}`}>
@@ -84,8 +84,8 @@ export default function StageTable({ projects }) {
             <tr key={`${p.code}-${i}`}>
               <td className="sticky-col code">{p.displayCode || '-'}</td>
               <td className="sticky-col2 left name" title={p.name}>{p.name}</td>
-              <td className="status">{p.status}</td>
-              <td className="owner">{p.owner}</td>
+              <td className="status sticky-col3">{p.status}</td>
+              <td className="owner sticky-col4">{p.owner}</td>
               {GROUPS.map((g) => (
                 <Fragment key={g.key}>
                   {g.stages.map((s) => (
