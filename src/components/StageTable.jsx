@@ -10,7 +10,10 @@ const DRAFT_AFTER = 'contract'
 
 // 본문 전체 컬럼 수 (매입 하위행 colSpan용)
 const STAGE_COUNT = GROUPS.reduce((n, g) => n + g.stages.length, 0)
-const COLS = 4 + STAGE_COUNT + 1 /*계약링크*/ + 1 /*회수율*/ + (SHOW_AMOUNTS ? 1 : 0)
+// SHOW_AMOUNTS 시 추가: 계약금 + 매출총이익 + 이익률 = 3
+const COLS = 4 + STAGE_COUNT + 1 /*계약링크*/ + 1 /*회수율*/ + (SHOW_AMOUNTS ? 3 : 0)
+
+const won = (n) => (n == null ? '-' : n.toLocaleString('ko-KR'))
 
 const MARK = {
   done: { t: 'O', cls: 'm-done' },
@@ -54,6 +57,7 @@ function BuyTable({ rows }) {
       <colgroup>
         <col style={{ width: '120px' }} />
         <col style={{ width: '260px' }} />
+        {SHOW_AMOUNTS && <col style={{ width: '120px' }} />}
         <col style={{ width: '64px' }} />
         <col style={{ width: '90px' }} />
         <col style={{ width: '64px' }} />
@@ -65,6 +69,7 @@ function BuyTable({ rows }) {
         <tr>
           <th rowSpan={2}>매입코드</th>
           <th rowSpan={2} className="left">업체</th>
+          {SHOW_AMOUNTS && <th rowSpan={2}>외주계약금</th>}
           <th rowSpan={2}>계약</th>
           <th rowSpan={2}>계약링크</th>
           <th colSpan={3}>지급요청서</th>
@@ -81,6 +86,7 @@ function BuyTable({ rows }) {
           <tr key={`${b.buyCode}-${i}`}>
             <td className="code">{b.buyCode || '-'}</td>
             <td className="left" title={b.vendor}>{b.vendor || '-'}</td>
+            {SHOW_AMOUNTS && <td className="amount">{b.amount || '-'}</td>}
             <td className="cell"><Mark status={b.stages.b_draft} /></td>
             <td className="draft"><LinkCell url={b.draftUrl} text={b.draft} /></td>
             <td className="cell"><Mark status={b.stages.b_pre} /></td>
@@ -127,6 +133,8 @@ export default function StageTable({ projects }) {
             ))}
             <th rowSpan={2}>매출 회수율</th>
             {SHOW_AMOUNTS && <th rowSpan={2}>계약금</th>}
+            {SHOW_AMOUNTS && <th rowSpan={2}>매출총이익</th>}
+            {SHOW_AMOUNTS && <th rowSpan={2}>이익률</th>}
           </tr>
           <tr className="sub-row">
             {GROUPS.flatMap((g) =>
@@ -179,6 +187,12 @@ export default function StageTable({ projects }) {
                     <Rate rate={p.recoveryRate} />
                   </td>
                   {SHOW_AMOUNTS && <td className="amount">{p.amount || '-'}</td>}
+                  {SHOW_AMOUNTS && <td className="amount">{won(p.grossProfit)}</td>}
+                  {SHOW_AMOUNTS && (
+                    <td className="progress">
+                      <Rate rate={p.profitRate} />
+                    </td>
+                  )}
                 </tr>
                 {open && hasChildren && (
                   <tr className="child-row">

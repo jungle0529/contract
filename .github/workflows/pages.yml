@@ -27,6 +27,9 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run build
+        env:
+          # 사용자 결정: 계약금·외주비·매출총이익(이익률)을 공개 사이트에 표시
+          VITE_SHOW_AMOUNTS: 'true'
       - uses: actions/configure-pages@v5
         with:
           enablement: true

@@ -65,7 +65,7 @@ function cell(row, idx) {
 }
 
 // 통화 문자열 → 숫자 ("", "-" 는 0)
-function money(raw) {
+export function money(raw) {
   const v = (raw || '').trim()
   if (v === '' || v === '-') return 0
   const n = parseFloat(v.replace(/[^0-9.\-]/g, ''))
@@ -156,6 +156,8 @@ export function toBuyRows(header, rows, draftUrls = []) {
       vendor: cell(r, meta.vendor),
       draft: cell(r, meta.draft),
       draftUrl: draftUrls[i] || '',
+      amount: cell(r, meta.amount), // 외주계약금(표시 문자열)
+      cost: money(cell(r, meta.amount)), // 외주계약금(숫자)
       stages,
       payRate,
     })

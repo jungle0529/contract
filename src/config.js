@@ -117,6 +117,7 @@ export const BUY_META = {
   item: { label: '품목', col: 'K' },
   vendor: { label: '업체', col: 'L' },
   draft: { label: '계약', match: ['계약기안'] }, // 계약 상태 + 계약링크 소스
+  amount: { label: '외주계약금', col: 'M' }, // 매입 외주 계약금
   payAmt: { label: '지급액', col: 'AN' },
   payRemain: { label: '잔여', col: 'AO' },
 }
