@@ -80,7 +80,15 @@ export default function StageTable({ projects }) {
                 <Recovery rate={p.recoveryRate} />
               </td>
               {SHOW_AMOUNTS && <td className="amount">{p.amount || '-'}</td>}
-              <td className="draft">{p.draft || '-'}</td>
+              <td className="draft">
+                {p.draftUrl ? (
+                  <a href={p.draftUrl} target="_blank" rel="noreferrer">
+                    {p.draft || '바로가기'}
+                  </a>
+                ) : (
+                  p.draft || '-'
+                )}
+              </td>
             </tr>
           ))}
         </tbody>

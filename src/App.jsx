@@ -21,8 +21,8 @@ export default function App() {
     setLoading(true)
     setError(null)
     try {
-      const { header, rows } = await fetchSheet()
-      setProjects(toProjects(header, rows))
+      const { header, rows, draftUrls } = await fetchSheet()
+      setProjects(toProjects(header, rows, draftUrls))
       setUpdatedAt(new Date())
     } catch (e) {
       setError(e.message || String(e))

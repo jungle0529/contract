@@ -73,7 +73,7 @@ function money(raw) {
 }
 
 // 한 행 → 프로젝트 객체
-export function toProject(row, colMap) {
+export function toProject(row, colMap, draftUrl = '') {
   const stages = {}
   let done = 0
   let applicable = 0
@@ -103,6 +103,7 @@ export function toProject(row, colMap) {
     year: cell(row, colMap.meta.year),
     amount: cell(row, colMap.meta.amount),
     draft: cell(row, colMap.meta.draft),
+    draftUrl: draftUrl || '',
     recoveryRate,
     stages,
     progress,
@@ -113,11 +114,11 @@ export function toProject(row, colMap) {
 
 // 전체 변환: 견적코드를 식별자로 보고, 코드가 있는 행만 프로젝트로 취급한다.
 // (코드 컬럼을 못 찾은 예외 상황에서는 프로젝트명으로 대체)
-export function toProjects(header, rows) {
+export function toProjects(header, rows, draftUrls = []) {
   const colMap = buildColumnMap(header)
   const hasCodeCol = colMap.meta.code >= 0
   return rows
-    .map((r) => toProject(r, colMap))
+    .map((r, i) => toProject(r, colMap, draftUrls[i]))
     .filter((p) => (hasCodeCol ? p.code : p.name))
 }
 

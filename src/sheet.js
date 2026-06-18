@@ -4,7 +4,7 @@
 // 리다이렉트 없이 text/csv 를 돌려주므로 브라우저 직접 호출에 가장 안전하다.
 // headers=0 으로 헤더 자동해석을 끄고, 헤더 행을 직접 찾는다.
 
-import { SHEET_ID, GID } from './config.js'
+import { SHEET_ID, GID, APPS_SCRIPT_URL } from './config.js'
 
 function getParam(name, fallback) {
   const v = new URLSearchParams(window.location.search).get(name)
@@ -82,8 +82,28 @@ export function resolveIndex(header, candidates) {
   return -1
 }
 
-// 시트를 가져와 { header, rows } 형태로 반환
+// Apps Script 웹앱에서 데이터 + 계약기안 링크 URL을 읽는다.
+async function fetchFromAppsScript(api) {
+  const res = await fetch(api)
+  if (!res.ok) throw new Error(`Apps Script 응답 오류 (${res.status})`)
+  const data = await res.json()
+  const values = data.values || []
+  const draftLinks = data.draftLinks || []
+  if (values.length === 0) throw new Error('시트가 비어 있습니다.')
+  const headerIdx = findHeaderRow(values)
+  const header = (values[headerIdx] || []).map((c) => (c || '').toString().trim())
+  return {
+    header,
+    rows: values.slice(headerIdx + 1),
+    draftUrls: draftLinks.slice(headerIdx + 1),
+  }
+}
+
+// 시트를 가져와 { header, rows, draftUrls } 형태로 반환
 export async function fetchSheet() {
+  const api = getParam('api', APPS_SCRIPT_URL)
+  if (api) return fetchFromAppsScript(api)
+
   const res = await fetch(sheetCsvUrl())
   if (!res.ok) {
     throw new Error(`시트 응답 오류 (${res.status}). 시트 공유 설정을 확인하세요.`)
@@ -95,5 +115,5 @@ export async function fetchSheet() {
   const headerIdx = findHeaderRow(all)
   const header = all[headerIdx].map((c) => (c || '').trim())
   const dataRows = all.slice(headerIdx + 1)
-  return { header, rows: dataRows }
+  return { header, rows: dataRows, draftUrls: [] }
 }
