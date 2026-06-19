@@ -233,9 +233,9 @@ tbody tr:hover .sticky-col4 { background: #f8fafc; }
 .has-children .code { color: var(--text); font-weight: 600; }
 
 /* 매입 하위 패널 */
-.child-row td { padding: 0; background: #f8fafc; }
-.buy-panel { padding: 10px 14px 14px 40px; }
-.buy-title { font-size: 12px; font-weight: 600; color: #4a505c; margin: 4px 0 8px; }
+.child-row td { padding: 0; background: #f8fafc; text-align: left; }
+.buy-panel { padding: 10px 14px 14px 40px; text-align: left; }
+.buy-title { font-size: 12px; font-weight: 600; color: #4a505c; margin: 4px 0 8px; text-align: left; }
 .buy-table {
   border-collapse: separate;
   border-spacing: 0;
