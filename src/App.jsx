@@ -78,7 +78,14 @@ export default function App() {
       if (category !== '전체' && p.category !== category) return false
       if (owner !== '전체' && p.owner !== owner) return false
       if (status !== '전체' && p.status !== status) return false
-      if (q && !`${p.code} ${p.name}`.toLowerCase().includes(q)) return false
+      if (q) {
+        // 매출(코드·계약코드·프로젝트명) + 매입(매입코드·업체·품목) 모두 검색
+        const hay = (
+          `${p.code} ${p.displayCode} ${p.name} ` +
+          (p.children || []).map((b) => `${b.buyCode} ${b.vendor} ${b.item}`).join(' ')
+        ).toLowerCase()
+        if (!hay.includes(q)) return false
+      }
       return true
     })
   }, [projects, query, owner, status, year, category])
@@ -132,7 +139,7 @@ export default function App() {
           {loading && projects.length === 0 ? (
             <div className="placeholder">불러오는 중…</div>
           ) : (
-            <StageTable projects={filtered} />
+            <StageTable projects={filtered} query={query} />
           )}
         </>
       )}

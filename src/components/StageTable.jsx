@@ -100,12 +100,20 @@ function BuyTable({ rows }) {
   )
 }
 
-export default function StageTable({ projects }) {
+export default function StageTable({ projects, query = '' }) {
   const [expanded, setExpanded] = useState(() => new Set())
 
   if (projects.length === 0) {
     return <div className="placeholder">표시할 프로젝트가 없습니다.</div>
   }
+
+  // 검색어가 매입에서 매칭되면 해당 행을 자동으로 펼친다
+  const q = query.trim().toLowerCase()
+  const childMatch = (p) =>
+    !!q &&
+    (p.children || []).some((b) =>
+      `${b.buyCode} ${b.vendor} ${b.item}`.toLowerCase().includes(q),
+    )
 
   const toggle = (key) =>
     setExpanded((prev) => {
@@ -150,7 +158,7 @@ export default function StageTable({ projects }) {
           {projects.map((p, i) => {
             const key = `${p.code}-${i}`
             const hasChildren = p.children && p.children.length > 0
-            const open = expanded.has(key)
+            const open = expanded.has(key) || childMatch(p)
             return (
               <Fragment key={key}>
                 <tr className={hasChildren ? 'has-children' : ''}>
