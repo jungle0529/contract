@@ -130,6 +130,7 @@ async function fetchFromAppsScript(api) {
     header,
     rows: values.slice(headerIdx + 1),
     draftUrls: draftLinks.slice(headerIdx + 1),
+    excludedIds: Array.isArray(data.excludedIds) ? data.excludedIds : [],
   }
   if (Array.isArray(data.buyValues) && data.buyValues.length) {
     const bv = data.buyValues
@@ -147,6 +148,11 @@ async function fetchFromAppsScript(api) {
 // Apps Script 사용 여부
 export function hasAppsScript() {
   return !!getParam('api', APPS_SCRIPT_URL)
+}
+
+// Apps Script 웹앱 URL (제외 동기화 POST 등에 사용)
+export function appsScriptUrl() {
+  return getParam('api', APPS_SCRIPT_URL)
 }
 
 // 빠른 경로: gviz CSV로 매출+매입을 병렬로 읽는다(링크 제외). 첫 화면용.

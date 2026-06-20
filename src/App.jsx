@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { fetchSheet, fetchSheetGviz, hasAppsScript } from './sheet.js'
+import { fetchSheet, fetchSheetGviz, hasAppsScript, appsScriptUrl } from './sheet.js'
 import { toProjects, toBuyRows, groupBuyByCode, money } from './derive.js'
 import { buildTransactions } from './settle.js'
 import Filters from './components/Filters.jsx'
@@ -10,6 +10,7 @@ export default function App() {
   const [projects, setProjects] = useState([])
   const [transactions, setTransactions] = useState([])
   const [excluded, setExcluded] = useState([])
+  const [serverExcluded, setServerExcluded] = useState(null) // 제외 탭 공유 id 목록
   const [tab, setTab] = useState('contract')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -22,7 +23,9 @@ export default function App() {
   const [category, setCategory] = useState('전체')
 
   // 가져온 데이터를 화면 모델로 변환해 반영
-  function applyData({ header, rows, draftUrls, buy }) {
+  function applyData(data) {
+    const { header, rows, draftUrls, buy } = data
+    if (Array.isArray(data.excludedIds)) setServerExcluded(data.excludedIds)
     const list = toProjects(header, rows, draftUrls)
     const buyMap = buy
       ? groupBuyByCode(toBuyRows(buy.header, buy.rows, buy.draftUrls))
@@ -173,7 +176,12 @@ export default function App() {
         loading && transactions.length === 0 ? (
           <div className="placeholder">불러오는 중…</div>
         ) : (
-          <Settlement transactions={transactions} excluded={excluded} />
+          <Settlement
+            transactions={transactions}
+            excluded={excluded}
+            serverExcluded={serverExcluded}
+            apiUrl={appsScriptUrl()}
+          />
         )
       )}
     </div>

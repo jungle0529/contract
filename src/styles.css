@@ -195,6 +195,7 @@ body {
   align-items: center;
   gap: 10px;
 }
+.xx-share { color: #b06a73; font-size: 12px; }
 .xx-clear {
   margin-left: auto;
   border: 1px solid #e0b3ba;

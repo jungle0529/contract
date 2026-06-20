@@ -31,7 +31,22 @@ const PRESETS = [
   { key: 'range', label: '기간 선택' },
 ]
 
-export default function Settlement({ transactions, excluded = [] }) {
+// 제외 변경을 Apps Script로 전송(text/plain + no-cors로 CORS 우회, fire-and-forget)
+function postExclude(apiUrl, payload) {
+  if (!apiUrl) return
+  try {
+    fetch(apiUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(payload),
+      mode: 'no-cors',
+    })
+  } catch {
+    /* 전송 실패 무시(다음 로드 시 서버값으로 재동기화) */
+  }
+}
+
+export default function Settlement({ transactions, excluded = [], serverExcluded = null, apiUrl = '' }) {
   const now = new Date()
   const thisMonth = `${now.getFullYear()}-${pad(now.getMonth() + 1)}`
 
@@ -56,12 +71,33 @@ export default function Settlement({ transactions, excluded = [] }) {
       /* 저장 실패 무시 */
     }
   }, [excludedIds])
-  const toggleExclude = (id) =>
+
+  // 제외 탭(공유) 값이 도착하면 그걸 정본으로 동기화
+  useEffect(() => {
+    if (Array.isArray(serverExcluded)) setExcludedIds(new Set(serverExcluded))
+  }, [serverExcluded])
+
+  // 거래 단위 제외/포함 토글 + 제외 탭에 기록
+  const toggleExclude = (t) =>
     setExcludedIds((prev) => {
       const n = new Set(prev)
-      n.has(id) ? n.delete(id) : n.add(id)
+      if (n.has(t.id)) {
+        n.delete(t.id)
+        postExclude(apiUrl, { action: 'remove', id: t.id })
+      } else {
+        n.add(t.id)
+        postExclude(apiUrl, {
+          action: 'add',
+          id: t.id,
+          meta: { kind: t.kind, code: t.code, label: t.label, date: t.dateKey, amount: t.amount, partner: t.partner },
+        })
+      }
       return n
     })
+  const clearExcluded = () => {
+    setExcludedIds(new Set())
+    postExclude(apiUrl, { action: 'clear' })
+  }
 
   const dateKeys = useMemo(
     () => transactions.map((t) => t.dateKey).filter(Boolean).sort(),
@@ -205,7 +241,8 @@ export default function Settlement({ transactions, excluded = [] }) {
       {excludedTx.length > 0 && (
         <div className="xx-notice">
           측정 제외(가라견적 등) <strong>{excludedTx.length}건 {won(excludedSum)}</strong>
-          <button className="xx-clear" onClick={() => setExcludedIds(new Set())}>모두 해제</button>
+          <span className="xx-share">· 모든 사용자 공유</span>
+          <button className="xx-clear" onClick={clearExcluded}>모두 해제</button>
         </div>
       )}
 
@@ -289,7 +326,7 @@ function MonthRow({ r, detail, excludedIds, toggleExclude }) {
                         <td className="right">
                           <button
                             className={`xx-btn ${off ? 'on' : ''}`}
-                            onClick={(e) => { e.stopPropagation(); toggleExclude(t.id) }}
+                            onClick={(e) => { e.stopPropagation(); toggleExclude(t) }}
                             title={off ? '측정에 다시 포함' : '측정에서 제외(가라견적 등)'}
                           >
                             {off ? '포함' : '제외'}

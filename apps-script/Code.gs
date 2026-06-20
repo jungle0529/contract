@@ -19,6 +19,7 @@
 
 var SHEET_ID = '1AHtE3d2-2eAy7sq2g6-L1VyoU7kt-h68Qgtv3cNDcLk';
 var BUY_GID = 1237292122;
+var EXCLUDE_HEADER = ['id', '구분', '계약코드', '단계', '날짜', '금액', '거래처', '갱신시각'];
 
 function doGet() {
   var ss = SpreadsheetApp.openById(SHEET_ID);
@@ -31,8 +32,72 @@ function doGet() {
     draftLinks: main.draftLinks,
     buyValues: buy.values,
     buyDraftLinks: buy.draftLinks,
+    excludedIds: readExcludedIds(ss), // 제외 탭(공유) → id 목록
   };
   return ContentService.createTextOutput(JSON.stringify(out)).setMimeType(ContentService.MimeType.JSON);
+}
+
+// 정산 제외 토글 기록 (브라우저에서 text/plain POST)
+function doPost(e) {
+  var resp = { ok: false };
+  try {
+    var body = JSON.parse(e.postData.contents);
+    var ss = SpreadsheetApp.openById(SHEET_ID);
+    var sh = getExcludeSheet(ss, true);
+    var id = String(body.id || '');
+
+    if (body.action === 'clear') {
+      if (sh.getLastRow() > 1) sh.getRange(2, 1, sh.getLastRow() - 1, sh.getLastColumn()).clearContent();
+    } else if (body.action === 'add' && id) {
+      if (findExcludeRow(sh, id) < 0) {
+        var m = body.meta || {};
+        sh.appendRow([id, m.kind || '', m.code || '', m.label || '', m.date || '', m.amount || '', m.partner || '', new Date()]);
+      }
+    } else if (body.action === 'remove' && id) {
+      var row = findExcludeRow(sh, id);
+      if (row >= 0) sh.deleteRow(row + 1);
+    }
+    resp.ok = true;
+  } catch (err) {
+    resp.error = String(err);
+  }
+  return ContentService.createTextOutput(JSON.stringify(resp)).setMimeType(ContentService.MimeType.JSON);
+}
+
+// 이름에 '제외'가 든 시트 (없으면 create=true 시 생성)
+function getExcludeSheet(ss, create) {
+  var sh = ss.getSheets();
+  for (var i = 0; i < sh.length; i++) {
+    if (sh[i].getName().indexOf('제외') >= 0) return sh[i];
+  }
+  if (create) {
+    var ns = ss.insertSheet('제외');
+    ns.appendRow(EXCLUDE_HEADER);
+    return ns;
+  }
+  return null;
+}
+
+function readExcludedIds(ss) {
+  var sh = getExcludeSheet(ss, false);
+  if (!sh || sh.getLastRow() < 2) return [];
+  var vals = sh.getRange(2, 1, sh.getLastRow() - 1, 1).getValues();
+  var ids = [];
+  for (var i = 0; i < vals.length; i++) {
+    var id = String(vals[i][0] || '').trim();
+    if (id) ids.push(id);
+  }
+  return ids;
+}
+
+// id가 있는 행의 0-based data index (헤더 제외) → 실제 행번호 = +1 후 +1
+function findExcludeRow(sh, id) {
+  if (sh.getLastRow() < 2) return -1;
+  var vals = sh.getRange(2, 1, sh.getLastRow() - 1, 1).getValues();
+  for (var i = 0; i < vals.length; i++) {
+    if (String(vals[i][0]).trim() === id) return i + 1; // 헤더가 1행이므로 데이터 i는 시트행 i+2 → deleteRow엔 +1 보정 위해 i+1 반환
+  }
+  return -1;
 }
 
 function getSheetByGid(ss, gid) {
