@@ -55,6 +55,15 @@ function toDateKey(s) {
 export function buildTransactions(sHeader, sRows, bHeader, bRows) {
   const tx = []
   const excluded = [] // 금액은 있으나 입·출금일이 없어 정산에 못 올라간 항목
+
+  // 계약코드 → 매출 대분류. 매입도 소속 프로젝트의 대분류로 분류해 같은 필터에 잡히게 한다.
+  const salesCatByCode = new Map()
+  for (const r of sRows || []) {
+    const code = cell(r, SALES.code)
+    const cat = cell(r, SALES.category)
+    if (code && cat && !salesCatByCode.has(code)) salesCatByCode.set(code, cat)
+  }
+
   for (const r of sRows || []) {
     for (const inst of SALES.recv) {
       const date = cell(r, inst.d)
@@ -110,7 +119,8 @@ export function buildTransactions(sHeader, sRows, bHeader, bRows) {
         amount,
         kind: 'purchase',
         label,
-        category: cell(r, BUY.category),
+        // 소속 매출(계약코드)의 대분류로 분류 (없으면 매입 종류로 폴백)
+        category: salesCatByCode.get(cell(r, BUY.code)) || cell(r, BUY.category),
         owner: cell(r, BUY.owner),
         partner: cell(r, BUY.partner),
         code: cell(r, BUY.code),
