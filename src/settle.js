@@ -30,9 +30,9 @@ const BUY = {
   partner: idx('L'), // 업체
   owner: idx('N'), // 담당자
   pay: [
-    { label: '선금', d: idx('Y'), a: idx('Z') },
-    { label: '중도금', d: idx('AF'), a: idx('AG') },
-    { label: '잔금', d: idx('AM'), a: idx('AN') },
+    { label: '선금', d: idx('Y'), a: idx('Z'), plan: idx('U') },
+    { label: '중도금', d: idx('AF'), a: idx('AG'), plan: idx('AB') },
+    { label: '잔금', d: idx('AM'), a: idx('AN'), plan: idx('AI') },
   ],
 }
 
@@ -85,18 +85,29 @@ export function buildTransactions(sHeader, sRows, bHeader, bRows) {
       const date = cell(r, inst.d)
       const amount = money(cell(r, inst.a))
       if (amount <= 0) continue
-      const ym = toYM(date)
+      let ym = toYM(date)
+      let dateKey = toDateKey(date)
+      let label = inst.label
+      // 지급일이 날짜가 아니면(상계처리예정 등) 발행일정 월로 기준
+      if (!ym) {
+        const plan = cell(r, inst.plan)
+        if (toYM(plan)) {
+          ym = toYM(plan)
+          dateKey = toDateKey(plan)
+          label = inst.label + ' (상계)'
+        }
+      }
       if (!ym) {
         excluded.push({ kind: 'purchase', label: inst.label, amount, code: cell(r, BUY.code), partner: cell(r, BUY.partner) })
         continue
       }
       tx.push({
         ym,
-        dateKey: toDateKey(date),
-        date,
+        dateKey,
+        date: dateKey,
         amount,
         kind: 'purchase',
-        label: inst.label,
+        label,
         category: cell(r, BUY.category),
         owner: cell(r, BUY.owner),
         partner: cell(r, BUY.partner),
