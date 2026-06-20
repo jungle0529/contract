@@ -1,11 +1,15 @@
 import { useEffect, useMemo, useState } from 'react'
 import { fetchSheet } from './sheet.js'
 import { toProjects, toBuyRows, groupBuyByCode, money } from './derive.js'
+import { buildTransactions } from './settle.js'
 import Filters from './components/Filters.jsx'
 import StageTable from './components/StageTable.jsx'
+import Settlement from './components/Settlement.jsx'
 
 export default function App() {
   const [projects, setProjects] = useState([])
+  const [transactions, setTransactions] = useState([])
+  const [tab, setTab] = useState('contract')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [updatedAt, setUpdatedAt] = useState(null)
@@ -36,6 +40,7 @@ export default function App() {
         p.profitRate = sales > 0 ? Math.round(((sales - cost) / sales) * 1000) / 10 : null
       }
       setProjects(list)
+      setTransactions(buildTransactions(header, rows, buy?.header, buy?.rows))
       setUpdatedAt(new Date())
     } catch (e) {
       setError(e.message || String(e))
@@ -93,13 +98,17 @@ export default function App() {
   return (
     <div className="app">
       <header className="topbar">
-        <div>
-          <h1>계약 단계 체크</h1>
-          <p className="sub">프로젝트별 매출 단계 진행 현황 · 체크 전용</p>
+        <div className="tabs">
+          <button className={`tab ${tab === 'contract' ? 'on' : ''}`} onClick={() => setTab('contract')}>
+            계약 단계
+          </button>
+          <button className={`tab ${tab === 'settle' ? 'on' : ''}`} onClick={() => setTab('settle')}>
+            정산
+          </button>
         </div>
         <div className="topbar-right">
           {updatedAt && (
-            <span className="updated">갱신 {updatedAt.toLocaleTimeString('ko-KR')}</span>
+            <span className="updated">갱신 {updatedAt.toLocaleDateString('ko-KR')}</span>
           )}
           <button className="btn" onClick={load} disabled={loading}>
             {loading ? '불러오는 중…' : '새로고침'}
@@ -118,8 +127,12 @@ export default function App() {
         </div>
       )}
 
-      {!error && (
+      {!error && tab === 'contract' && (
         <>
+          <div className="settle-head">
+            <h1>계약 단계 체크</h1>
+            <p className="sub">프로젝트별 매출 단계 진행 현황 · 체크 전용</p>
+          </div>
           <Filters
             query={query}
             setQuery={setQuery}
@@ -142,6 +155,14 @@ export default function App() {
             <StageTable projects={filtered} query={query} />
           )}
         </>
+      )}
+
+      {!error && tab === 'settle' && (
+        loading && transactions.length === 0 ? (
+          <div className="placeholder">불러오는 중…</div>
+        ) : (
+          <Settlement transactions={transactions} />
+        )
       )}
     </div>
   )
