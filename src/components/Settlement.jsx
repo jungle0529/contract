@@ -210,22 +210,6 @@ export default function Settlement({ transactions, excluded = [] }) {
       )}
 
       <section className="panel">
-        <div className="panel-title">월별 추이 (매출 vs 매입)</div>
-        <div className="legend"><span className="dot blue" />매출 회수<span className="dot orange" />매입 지급</div>
-        <div className="chart">
-          {rows.map((r) => (
-            <div className="bar-col" key={r.m} title={`${r.m}\n매출 ${won(r.sales)}\n매입 ${won(r.purchase)}`}>
-              <div className="bars">
-                <div className="b sales" style={{ height: `${(r.sales / maxBar) * 100}%` }} />
-                <div className="b purchase" style={{ height: `${(r.purchase / maxBar) * 100}%` }} />
-              </div>
-              <div className="bar-x">{r.m.slice(2)}</div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      <section className="panel">
         <div className="panel-title">월별 표 (행 클릭 시 그 달 거래 상세)</div>
         <table className="settle-table">
           <thead>
@@ -254,6 +238,22 @@ export default function Settlement({ transactions, excluded = [] }) {
             )}
           </tbody>
         </table>
+      </section>
+
+      <section className="panel">
+        <div className="panel-title">월별 추이 (매출 vs 매입)</div>
+        <div className="legend"><span className="dot blue" />매출 회수<span className="dot orange" />매입 지급</div>
+        <div className="chart">
+          {rows.map((r) => (
+            <div className="bar-col" key={r.m} title={`${r.m}\n매출 ${won(r.sales)}\n매입 ${won(r.purchase)}`}>
+              <div className="bars">
+                <div className="b sales" style={{ height: `${(r.sales / maxBar) * 100}%` }} />
+                <div className="b purchase" style={{ height: `${(r.purchase / maxBar) * 100}%` }} />
+              </div>
+              <div className="bar-x">{r.m.slice(2)}</div>
+            </div>
+          ))}
+        </div>
       </section>
     </div>
   )
