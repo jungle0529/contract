@@ -93,7 +93,7 @@ export default function App() {
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase()
-    return projects.filter((p) => {
+    const list = projects.filter((p) => {
       if (year !== '전체' && p.year !== year) return false
       if (category !== '전체' && p.category !== category) return false
       if (owner !== '전체' && p.owner !== owner) return false
@@ -108,6 +108,7 @@ export default function App() {
       }
       return true
     })
+    return list.reverse() // 최근(시트 뒤쪽 = 최신 계약)부터
   }, [projects, query, owner, status, year, category])
 
   return (
