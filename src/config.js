@@ -18,7 +18,7 @@ export const GID = '0'
 // 비워두면 gviz CSV 로 읽고 계약링크는 텍스트만 표시.
 // 페이지 URL ?api=<웹앱URL> 로도 덮어쓸 수 있다.
 export const APPS_SCRIPT_URL =
-  'https://script.google.com/macros/s/AKfycbxeJw7Isblqpde_ofblWecwUwGWHVdDTrSkiTqrlRtu_7cT_OiKG8AmgFCpj6jvsTqSKQ/exec'
+  'https://script.google.com/macros/s/AKfycbzmg3R4JDQdq1NdgQPlP8bx_hGg6cQbeIVGv7n68wXKgkSBUc4TPTLvIK8K-5VnxSrkcg/exec'
 
 // 프로젝트 식별/메타 컬럼. match 는 시트 헤더명에 대한 후보(부분일치) 목록.
 export const META = {
