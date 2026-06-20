@@ -138,24 +138,31 @@ async function fetchFromAppsScript(api) {
   return result
 }
 
-// 시트를 가져와 { header, rows, draftUrls, buy } 형태로 반환
-export async function fetchSheet() {
-  const api = getParam('api', APPS_SCRIPT_URL)
-  if (api) {
-    const main = await fetchFromAppsScript(api)
-    // Apps Script가 매입을 안 주면 gviz로 보충(링크 제외)
-    if (!main.buy) main.buy = await fetchBuyGviz()
-    return main
-  }
+// Apps Script 사용 여부
+export function hasAppsScript() {
+  return !!getParam('api', APPS_SCRIPT_URL)
+}
 
+// 빠른 경로: gviz CSV로 매출+매입을 병렬로 읽는다(링크 제외). 첫 화면용.
+export async function fetchSheetGviz() {
   const [res, buy] = await Promise.all([fetch(sheetCsvUrl()), fetchBuyGviz()])
   if (!res.ok) {
     throw new Error(`시트 응답 오류 (${res.status}). 시트 공유 설정을 확인하세요.`)
   }
   const all = parseCsv(await res.text())
   if (all.length === 0) throw new Error('시트가 비어 있습니다.')
-
   const headerIdx = findHeaderRow(all)
   const header = all[headerIdx].map((c) => (c || '').trim())
   return { header, rows: all.slice(headerIdx + 1), draftUrls: [], buy }
+}
+
+// 전체 경로: Apps Script(있으면 링크 포함) 또는 gviz. { header, rows, draftUrls, buy }
+export async function fetchSheet() {
+  const api = getParam('api', APPS_SCRIPT_URL)
+  if (api) {
+    const main = await fetchFromAppsScript(api)
+    if (!main.buy) main.buy = await fetchBuyGviz()
+    return main
+  }
+  return fetchSheetGviz()
 }

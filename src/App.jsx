@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { fetchSheet } from './sheet.js'
+import { fetchSheet, fetchSheetGviz, hasAppsScript } from './sheet.js'
 import { toProjects, toBuyRows, groupBuyByCode, money } from './derive.js'
 import { buildTransactions } from './settle.js'
 import Filters from './components/Filters.jsx'
@@ -20,31 +20,40 @@ export default function App() {
   const [year, setYear] = useState('전체')
   const [category, setCategory] = useState('전체')
 
+  // 가져온 데이터를 화면 모델로 변환해 반영
+  function applyData({ header, rows, draftUrls, buy }) {
+    const list = toProjects(header, rows, draftUrls)
+    const buyMap = buy
+      ? groupBuyByCode(toBuyRows(buy.header, buy.rows, buy.draftUrls))
+      : new Map()
+    for (const p of list) {
+      p.children = buyMap.get(p.displayCode) || []
+      const sales = money(p.amount)
+      const cost = p.children.reduce((s, b) => s + (b.cost || 0), 0)
+      p.cost = cost
+      p.grossProfit = sales > 0 ? sales - cost : null
+      p.profitRate = sales > 0 ? Math.round(((sales - cost) / sales) * 1000) / 10 : null
+    }
+    setProjects(list)
+    setTransactions(buildTransactions(header, rows, buy?.header, buy?.rows))
+    setUpdatedAt(new Date())
+  }
+
   async function load() {
     setLoading(true)
     setError(null)
     try {
-      const { header, rows, draftUrls, buy } = await fetchSheet()
-      const list = toProjects(header, rows, draftUrls)
-      // 매입을 계약코드별로 묶어 해당 매출(계약코드=displayCode) 아래에 붙인다
-      const buyMap = buy
-        ? groupBuyByCode(toBuyRows(buy.header, buy.rows, buy.draftUrls))
-        : new Map()
-      for (const p of list) {
-        p.children = buyMap.get(p.displayCode) || []
-        // 매출총이익 = 매출 계약금 − Σ매입 외주계약금
-        const sales = money(p.amount)
-        const cost = p.children.reduce((s, b) => s + (b.cost || 0), 0)
-        p.cost = cost
-        p.grossProfit = sales > 0 ? sales - cost : null
-        p.profitRate = sales > 0 ? Math.round(((sales - cost) / sales) * 1000) / 10 : null
+      // 1단계: gviz로 빠르게 그린다(링크 제외)
+      applyData(await fetchSheetGviz())
+      setLoading(false)
+      // 2단계: Apps Script로 계약링크 URL을 백그라운드에서 받아 채운다
+      if (hasAppsScript()) {
+        fetchSheet()
+          .then((full) => applyData(full))
+          .catch(() => {}) // 링크 보강 실패는 무시(데이터는 이미 표시됨)
       }
-      setProjects(list)
-      setTransactions(buildTransactions(header, rows, buy?.header, buy?.rows))
-      setUpdatedAt(new Date())
     } catch (e) {
       setError(e.message || String(e))
-    } finally {
       setLoading(false)
     }
   }
