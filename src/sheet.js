@@ -11,10 +11,15 @@ function getParam(name, fallback) {
   return v && v.trim() ? v.trim() : fallback
 }
 
+// 캐시 무력화용 쿼리 (브라우저·CDN이 옛 시트 응답을 주지 않도록)
+function bust() {
+  return `_=${Date.now()}`
+}
+
 export function sheetCsvUrl() {
   const id = getParam('sheetId', SHEET_ID)
   const gid = getParam('gid', GID)
-  return `https://docs.google.com/spreadsheets/d/${id}/gviz/tq?tqx=out:csv&gid=${gid}&headers=0`
+  return `https://docs.google.com/spreadsheets/d/${id}/gviz/tq?tqx=out:csv&gid=${gid}&headers=0&${bust()}`
 }
 
 // RFC4180 기반의 작은 CSV 파서 (따옴표/줄바꿈/이스케이프 처리)
@@ -97,7 +102,7 @@ async function fetchBuyGviz() {
   const gid = getParam('buyGid', BUY_GID)
   try {
     const res = await fetch(
-      `https://docs.google.com/spreadsheets/d/${id}/gviz/tq?tqx=out:csv&gid=${gid}&headers=0`,
+      `https://docs.google.com/spreadsheets/d/${id}/gviz/tq?tqx=out:csv&gid=${gid}&headers=0&${bust()}`,
     )
     if (!res.ok) return { header: [], rows: [], draftUrls: [] }
     const all = parseCsv(await res.text())
@@ -112,7 +117,8 @@ async function fetchBuyGviz() {
 // Apps Script 웹앱에서 데이터 + 계약기안 링크 URL을 읽는다.
 // 매입(buyValues/buyDraftLinks)을 함께 주면 그대로 사용한다.
 async function fetchFromAppsScript(api) {
-  const res = await fetch(api)
+  const url = api + (api.includes('?') ? '&' : '?') + bust()
+  const res = await fetch(url)
   if (!res.ok) throw new Error(`Apps Script 응답 오류 (${res.status})`)
   const data = await res.json()
   const values = data.values || []
