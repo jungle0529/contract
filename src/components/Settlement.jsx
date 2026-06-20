@@ -320,7 +320,7 @@ function MonthRow({ r, detail, excludedIds, toggleExclude }) {
                         <td className={`kind ${t.kind}`}>{t.kind === 'sales' ? '매출' : '매입'}</td>
                         <td>{t.dateKey}</td>
                         <td className="left">{t.partner || '-'}</td>
-                        <td className="left dim">{t.kind === 'sales' ? t.name : t.code}</td>
+                        <td className="left dim">{t.name || t.code}</td>
                         <td className="dim">{t.label}</td>
                         <td className="right">{won(t.amount)}</td>
                         <td className="right">

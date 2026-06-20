@@ -26,6 +26,7 @@ const SALES = {
 
 const BUY = {
   code: idx('A'),
+  name: idx('B'), // 프로젝트명
   category: idx('J'), // 종류
   partner: idx('L'), // 업체
   owner: idx('N'), // 담당자
@@ -124,7 +125,7 @@ export function buildTransactions(sHeader, sRows, bHeader, bRows) {
         owner: cell(r, BUY.owner),
         partner: cell(r, BUY.partner),
         code: cell(r, BUY.code),
-        name: cell(r, BUY.partner),
+        name: cell(r, BUY.name), // 매입 프로젝트명(B열)
       })
     }
   }
