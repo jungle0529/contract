@@ -222,7 +222,7 @@ export default function Settlement({ transactions, excluded = [] }) {
             </tr>
           </thead>
           <tbody>
-            {rows.map((r) => (
+            {[...rows].reverse().map((r) => (
               <MonthRow
                 key={r.m}
                 r={r}
