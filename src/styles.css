@@ -126,6 +126,22 @@ body {
 .legend .dot.blue { background: var(--accent); margin-left: 0; }
 .legend .dot.orange { background: #e89a3c; }
 
+/* 가로 막대 차트 (공간 효율) */
+.hchart { display: flex; flex-direction: column; gap: 6px; padding-top: 6px; }
+.hrow { display: flex; align-items: center; gap: 12px; }
+.hlabel {
+  width: 64px;
+  flex-shrink: 0;
+  font-size: 12px;
+  color: #4a505c;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+.htrack { flex: 1; display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.hbar { height: 9px; border-radius: 0 4px 4px 0; min-width: 1px; }
+.hbar.sales { background: var(--accent); }
+.hbar.purchase { background: #e89a3c; }
+
 .chart { display: flex; align-items: flex-end; gap: 8px; height: 240px; overflow-x: auto; padding-top: 8px; }
 .bar-col { flex: 1 0 auto; min-width: 40px; display: flex; flex-direction: column; align-items: center; height: 100%; }
 .bars { flex: 1; display: flex; align-items: flex-end; gap: 3px; justify-content: center; width: 100%; }
@@ -139,9 +155,7 @@ body {
 .settle-table th { color: var(--muted); font-weight: 600; font-size: 12px; }
 .settle-table .right { text-align: right; font-variant-numeric: tabular-nums; }
 .settle-table .left { text-align: left; }
-.m-row { cursor: pointer; }
-.m-row:hover td { background: #f8fafc; }
-.m-row.open td { background: #eef4ff; }
+.m-row.static td { background: #fbfcfd; font-weight: 500; }
 .settle-table .neg { color: var(--no); }
 .settle-table .pos { color: var(--done); }
 .empty { text-align: center; color: var(--muted); padding: 24px; }

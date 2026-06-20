@@ -40,7 +40,6 @@ export default function Settlement({ transactions, excluded = [] }) {
   const [rangeFrom, setRangeFrom] = useState('')
   const [rangeTo, setRangeTo] = useState('')
   const [category, setCategory] = useState('전체')
-  const [openMonth, setOpenMonth] = useState(null)
 
   // 측정 제외(가라견적 등) — 거래 id 집합, 로컬에 저장
   const [excludedIds, setExcludedIds] = useState(() => {
@@ -135,6 +134,7 @@ export default function Settlement({ transactions, excluded = [] }) {
   const totalSales = active.reduce((s, t) => (t.kind === 'sales' ? s + t.amount : s), 0)
   const totalPurchase = active.reduce((s, t) => (t.kind === 'purchase' ? s + t.amount : s), 0)
   const maxBar = Math.max(1, ...rows.flatMap((r) => [r.sales, r.purchase]))
+  const displayRows = useMemo(() => [...rows].reverse(), [rows]) // 최신순(최근이 위)
   const monthDetail = (m) => inScope.filter((t) => t.ym === m).sort((a, b) => a.dateKey.localeCompare(b.dateKey))
 
   // 사용자가 제외한 거래(가라견적 등) 요약
@@ -210,7 +210,24 @@ export default function Settlement({ transactions, excluded = [] }) {
       )}
 
       <section className="panel">
-        <div className="panel-title">월별 표 (행 클릭 시 그 달 거래 상세)</div>
+        <div className="panel-title">월별 추이 (매출 vs 매입)</div>
+        <div className="legend"><span className="dot blue" />매출 회수<span className="dot orange" />매입 지급</div>
+        <div className="hchart">
+          {displayRows.map((r) => (
+            <div className="hrow" key={r.m} title={`${r.m}\n매출 ${won(r.sales)}\n매입 ${won(r.purchase)}`}>
+              <div className="hlabel">{r.m}</div>
+              <div className="htrack">
+                <div className="hbar sales" style={{ width: `${(r.sales / maxBar) * 100}%` }} />
+                <div className="hbar purchase" style={{ width: `${(r.purchase / maxBar) * 100}%` }} />
+              </div>
+            </div>
+          ))}
+          {displayRows.length === 0 && <div className="empty sm">기간 내 거래가 없습니다.</div>}
+        </div>
+      </section>
+
+      <section className="panel">
+        <div className="panel-title">월별 표</div>
         <table className="settle-table">
           <thead>
             <tr>
@@ -222,13 +239,11 @@ export default function Settlement({ transactions, excluded = [] }) {
             </tr>
           </thead>
           <tbody>
-            {[...rows].reverse().map((r) => (
+            {displayRows.map((r) => (
               <MonthRow
                 key={r.m}
                 r={r}
-                open={openMonth === r.m}
-                onToggle={() => setOpenMonth(openMonth === r.m ? null : r.m)}
-                detail={openMonth === r.m ? monthDetail(r.m) : null}
+                detail={monthDetail(r.m)}
                 excludedIds={excludedIds}
                 toggleExclude={toggleExclude}
               />
@@ -239,37 +254,21 @@ export default function Settlement({ transactions, excluded = [] }) {
           </tbody>
         </table>
       </section>
-
-      <section className="panel">
-        <div className="panel-title">월별 추이 (매출 vs 매입)</div>
-        <div className="legend"><span className="dot blue" />매출 회수<span className="dot orange" />매입 지급</div>
-        <div className="chart">
-          {rows.map((r) => (
-            <div className="bar-col" key={r.m} title={`${r.m}\n매출 ${won(r.sales)}\n매입 ${won(r.purchase)}`}>
-              <div className="bars">
-                <div className="b sales" style={{ height: `${(r.sales / maxBar) * 100}%` }} />
-                <div className="b purchase" style={{ height: `${(r.purchase / maxBar) * 100}%` }} />
-              </div>
-              <div className="bar-x">{r.m.slice(2)}</div>
-            </div>
-          ))}
-        </div>
-      </section>
     </div>
   )
 }
 
-function MonthRow({ r, open, onToggle, detail, excludedIds, toggleExclude }) {
+function MonthRow({ r, detail, excludedIds, toggleExclude }) {
   return (
     <>
-      <tr className={`m-row ${open ? 'open' : ''}`} onClick={onToggle}>
+      <tr className="m-row static">
         <td className="left">{r.m}</td>
         <td className="right">{won(r.sales)}</td>
         <td className="right">{won(r.purchase)}</td>
         <td className={`right ${r.net < 0 ? 'neg' : 'pos'}`}>{won(r.net)}</td>
         <td className={`right ${r.cum < 0 ? 'neg' : 'pos'}`}>{won(r.cum)}</td>
       </tr>
-      {open && detail && (
+      {detail && detail.length > 0 && (
         <tr className="detail-row">
           <td colSpan={5}>
             {detail.length === 0 ? (
