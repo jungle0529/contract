@@ -1,5 +1,7 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useState, useEffect } from 'react'
 import DateRangePicker from './DateRangePicker.jsx'
+
+const EXCLUDE_KEY = 'settle-excluded-v1'
 
 const won = (n) => '₩' + Math.round(n || 0).toLocaleString('ko-KR')
 const pad = (n) => String(n).padStart(2, '0')
@@ -40,6 +42,28 @@ export default function Settlement({ transactions, excluded = [] }) {
   const [category, setCategory] = useState('전체')
   const [openMonth, setOpenMonth] = useState(null)
 
+  // 측정 제외(가라견적 등) — 거래 id 집합, 로컬에 저장
+  const [excludedIds, setExcludedIds] = useState(() => {
+    try {
+      return new Set(JSON.parse(localStorage.getItem(EXCLUDE_KEY) || '[]'))
+    } catch {
+      return new Set()
+    }
+  })
+  useEffect(() => {
+    try {
+      localStorage.setItem(EXCLUDE_KEY, JSON.stringify([...excludedIds]))
+    } catch {
+      /* 저장 실패 무시 */
+    }
+  }, [excludedIds])
+  const toggleExclude = (id) =>
+    setExcludedIds((prev) => {
+      const n = new Set(prev)
+      n.has(id) ? n.delete(id) : n.add(id)
+      return n
+    })
+
   const dateKeys = useMemo(
     () => transactions.map((t) => t.dateKey).filter(Boolean).sort(),
     [transactions],
@@ -79,7 +103,8 @@ export default function Settlement({ transactions, excluded = [] }) {
     [transactions],
   )
 
-  const filtered = useMemo(
+  // 기간·대분류 범위(제외 전) — 상세에는 제외건도 보여 토글할 수 있게
+  const inScope = useMemo(
     () =>
       transactions.filter((t) => {
         if (!t.dateKey || t.dateKey < from || t.dateKey > to) return false
@@ -88,11 +113,13 @@ export default function Settlement({ transactions, excluded = [] }) {
       }),
     [transactions, from, to, category],
   )
+  // 측정에 실제 반영되는 거래(제외건 뺀 것)
+  const active = useMemo(() => inScope.filter((t) => !excludedIds.has(t.id)), [inScope, excludedIds])
 
   const months = useMemo(() => monthsBetween(from.slice(0, 7), to.slice(0, 7)), [from, to])
   const rows = useMemo(() => {
     const map = new Map(months.map((m) => [m, { sales: 0, purchase: 0 }]))
-    for (const t of filtered) {
+    for (const t of active) {
       const b = map.get(t.ym)
       if (b) b[t.kind] += t.amount
     }
@@ -103,12 +130,16 @@ export default function Settlement({ transactions, excluded = [] }) {
       cum += net
       return { m, sales: b.sales, purchase: b.purchase, net, cum }
     })
-  }, [months, filtered])
+  }, [months, active])
 
-  const totalSales = filtered.reduce((s, t) => (t.kind === 'sales' ? s + t.amount : s), 0)
-  const totalPurchase = filtered.reduce((s, t) => (t.kind === 'purchase' ? s + t.amount : s), 0)
+  const totalSales = active.reduce((s, t) => (t.kind === 'sales' ? s + t.amount : s), 0)
+  const totalPurchase = active.reduce((s, t) => (t.kind === 'purchase' ? s + t.amount : s), 0)
   const maxBar = Math.max(1, ...rows.flatMap((r) => [r.sales, r.purchase]))
-  const monthDetail = (m) => filtered.filter((t) => t.ym === m).sort((a, b) => a.dateKey.localeCompare(b.dateKey))
+  const monthDetail = (m) => inScope.filter((t) => t.ym === m).sort((a, b) => a.dateKey.localeCompare(b.dateKey))
+
+  // 사용자가 제외한 거래(가라견적 등) 요약
+  const excludedTx = useMemo(() => transactions.filter((t) => excludedIds.has(t.id)), [transactions, excludedIds])
+  const excludedSum = excludedTx.reduce((s, t) => s + t.amount, 0)
 
   // 금액은 있으나 입·출금일 미입력 → 정산 미반영
   const exSales = excluded.filter((e) => e.kind === 'sales')
@@ -171,6 +202,13 @@ export default function Settlement({ transactions, excluded = [] }) {
         </div>
       )}
 
+      {excludedTx.length > 0 && (
+        <div className="xx-notice">
+          측정 제외(가라견적 등) <strong>{excludedTx.length}건 {won(excludedSum)}</strong>
+          <button className="xx-clear" onClick={() => setExcludedIds(new Set())}>모두 해제</button>
+        </div>
+      )}
+
       <section className="panel">
         <div className="panel-title">월별 추이 (매출 vs 매입)</div>
         <div className="legend"><span className="dot blue" />매출 회수<span className="dot orange" />매입 지급</div>
@@ -207,6 +245,8 @@ export default function Settlement({ transactions, excluded = [] }) {
                 open={openMonth === r.m}
                 onToggle={() => setOpenMonth(openMonth === r.m ? null : r.m)}
                 detail={openMonth === r.m ? monthDetail(r.m) : null}
+                excludedIds={excludedIds}
+                toggleExclude={toggleExclude}
               />
             ))}
             {rows.length === 0 && (
@@ -219,7 +259,7 @@ export default function Settlement({ transactions, excluded = [] }) {
   )
 }
 
-function MonthRow({ r, open, onToggle, detail }) {
+function MonthRow({ r, open, onToggle, detail, excludedIds, toggleExclude }) {
   return (
     <>
       <tr className={`m-row ${open ? 'open' : ''}`} onClick={onToggle}>
@@ -237,16 +277,28 @@ function MonthRow({ r, open, onToggle, detail }) {
             ) : (
               <table className="detail-table">
                 <tbody>
-                  {detail.map((t, i) => (
-                    <tr key={i}>
-                      <td className={`kind ${t.kind}`}>{t.kind === 'sales' ? '매출' : '매입'}</td>
-                      <td>{t.dateKey}</td>
-                      <td className="left">{t.partner || '-'}</td>
-                      <td className="left dim">{t.kind === 'sales' ? t.name : t.code}</td>
-                      <td className="dim">{t.label}</td>
-                      <td className="right">{won(t.amount)}</td>
-                    </tr>
-                  ))}
+                  {detail.map((t, i) => {
+                    const off = excludedIds.has(t.id)
+                    return (
+                      <tr key={i} className={off ? 'excluded' : ''}>
+                        <td className={`kind ${t.kind}`}>{t.kind === 'sales' ? '매출' : '매입'}</td>
+                        <td>{t.dateKey}</td>
+                        <td className="left">{t.partner || '-'}</td>
+                        <td className="left dim">{t.kind === 'sales' ? t.name : t.code}</td>
+                        <td className="dim">{t.label}</td>
+                        <td className="right">{won(t.amount)}</td>
+                        <td className="right">
+                          <button
+                            className={`xx-btn ${off ? 'on' : ''}`}
+                            onClick={(e) => { e.stopPropagation(); toggleExclude(t.id) }}
+                            title={off ? '측정에 다시 포함' : '측정에서 제외(가라견적 등)'}
+                          >
+                            {off ? '포함' : '제외'}
+                          </button>
+                        </td>
+                      </tr>
+                    )
+                  })}
                 </tbody>
               </table>
             )}

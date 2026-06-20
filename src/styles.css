@@ -156,6 +156,41 @@ body {
 .detail-table .kind { font-weight: 600; }
 .detail-table .kind.sales { color: var(--accent); }
 .detail-table .kind.purchase { color: #d9822b; }
+.detail-table tr.excluded td { color: #b6bcc6; text-decoration: line-through; }
+.detail-table tr.excluded .kind { text-decoration: none; }
+.xx-btn {
+  border: 1px solid var(--line);
+  background: #fff;
+  border-radius: 6px;
+  padding: 2px 10px;
+  font-size: 11px;
+  cursor: pointer;
+  color: #6b7280;
+}
+.xx-btn:hover { border-color: var(--no); color: var(--no); }
+.xx-btn.on { background: var(--no); color: #fff; border-color: var(--no); text-decoration: none; }
+
+.xx-notice {
+  background: #fdeef0;
+  border: 1px solid #f1c7cd;
+  border-radius: 12px;
+  padding: 10px 16px;
+  font-size: 13px;
+  color: #8a2a36;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.xx-clear {
+  margin-left: auto;
+  border: 1px solid #e0b3ba;
+  background: #fff;
+  border-radius: 6px;
+  padding: 3px 10px;
+  font-size: 12px;
+  cursor: pointer;
+  color: #8a2a36;
+}
 
 .topbar {
   display: flex;

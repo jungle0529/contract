@@ -66,6 +66,7 @@ export function buildTransactions(sHeader, sRows, bHeader, bRows) {
         continue
       }
       tx.push({
+        id: `sales|${cell(r, SALES.code)}|${inst.label}|${toDateKey(date)}|${amount}|${cell(r, SALES.partner)}`,
         ym,
         dateKey: toDateKey(date),
         date,
@@ -102,6 +103,7 @@ export function buildTransactions(sHeader, sRows, bHeader, bRows) {
         continue
       }
       tx.push({
+        id: `purchase|${cell(r, BUY.code)}|${label}|${dateKey}|${amount}|${cell(r, BUY.partner)}`,
         ym,
         dateKey,
         date: dateKey,
