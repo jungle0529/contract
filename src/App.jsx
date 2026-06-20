@@ -9,6 +9,7 @@ import Settlement from './components/Settlement.jsx'
 export default function App() {
   const [projects, setProjects] = useState([])
   const [transactions, setTransactions] = useState([])
+  const [excluded, setExcluded] = useState([])
   const [tab, setTab] = useState('contract')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -35,7 +36,9 @@ export default function App() {
       p.profitRate = sales > 0 ? Math.round(((sales - cost) / sales) * 1000) / 10 : null
     }
     setProjects(list)
-    setTransactions(buildTransactions(header, rows, buy?.header, buy?.rows))
+    const settle = buildTransactions(header, rows, buy?.header, buy?.rows)
+    setTransactions(settle.transactions)
+    setExcluded(settle.excluded)
     setUpdatedAt(new Date())
   }
 
@@ -170,7 +173,7 @@ export default function App() {
         loading && transactions.length === 0 ? (
           <div className="placeholder">불러오는 중…</div>
         ) : (
-          <Settlement transactions={transactions} />
+          <Settlement transactions={transactions} excluded={excluded} />
         )
       )}
     </div>

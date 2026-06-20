@@ -109,6 +109,16 @@ body {
 .cal-day.inrange { background: #e8f0fe; border-radius: 0; }
 .cal-day.end { background: var(--accent); color: #fff; border-radius: 6px; }
 
+.ex-notice { background: #fff8ec; border: 1px solid #f0dcae; border-radius: 12px; padding: 12px 16px; font-size: 13px; }
+.ex-head { cursor: pointer; color: #8a6d3b; }
+.ex-head strong { color: #8a5a00; }
+.ex-toggle { color: var(--accent); margin-left: 8px; font-size: 12px; }
+.ex-list { margin: 10px 0 2px; padding-left: 4px; list-style: none; display: grid; gap: 4px; }
+.ex-list li { font-size: 12px; color: #4a505c; }
+.ex-list .kind { font-weight: 600; margin-right: 6px; }
+.ex-list .kind.sales { color: var(--accent); }
+.ex-list .kind.purchase { color: #d9822b; }
+
 .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px; }
 .panel-title { font-weight: 600; font-size: 14px; }
 .legend { font-size: 12px; color: var(--muted); margin: 6px 0 12px; display: flex; align-items: center; gap: 6px; }

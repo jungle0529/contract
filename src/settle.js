@@ -54,12 +54,17 @@ function toDateKey(s) {
 
 export function buildTransactions(sHeader, sRows, bHeader, bRows) {
   const tx = []
+  const excluded = [] // 금액은 있으나 입·출금일이 없어 정산에 못 올라간 항목
   for (const r of sRows || []) {
     for (const inst of SALES.recv) {
       const date = cell(r, inst.d)
       const amount = money(cell(r, inst.a))
+      if (amount <= 0) continue
       const ym = toYM(date)
-      if (!ym || amount <= 0) continue
+      if (!ym) {
+        excluded.push({ kind: 'sales', label: inst.label, amount, code: cell(r, SALES.code), partner: cell(r, SALES.partner) })
+        continue
+      }
       tx.push({
         ym,
         dateKey: toDateKey(date),
@@ -79,8 +84,12 @@ export function buildTransactions(sHeader, sRows, bHeader, bRows) {
     for (const inst of BUY.pay) {
       const date = cell(r, inst.d)
       const amount = money(cell(r, inst.a))
+      if (amount <= 0) continue
       const ym = toYM(date)
-      if (!ym || amount <= 0) continue
+      if (!ym) {
+        excluded.push({ kind: 'purchase', label: inst.label, amount, code: cell(r, BUY.code), partner: cell(r, BUY.partner) })
+        continue
+      }
       tx.push({
         ym,
         dateKey: toDateKey(date),
@@ -96,5 +105,5 @@ export function buildTransactions(sHeader, sRows, bHeader, bRows) {
       })
     }
   }
-  return tx
+  return { transactions: tx, excluded }
 }

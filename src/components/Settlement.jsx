@@ -29,7 +29,7 @@ const PRESETS = [
   { key: 'range', label: '기간 선택' },
 ]
 
-export default function Settlement({ transactions }) {
+export default function Settlement({ transactions, excluded = [] }) {
   const now = new Date()
   const thisMonth = `${now.getFullYear()}-${pad(now.getMonth() + 1)}`
 
@@ -110,6 +110,13 @@ export default function Settlement({ transactions }) {
   const maxBar = Math.max(1, ...rows.flatMap((r) => [r.sales, r.purchase]))
   const monthDetail = (m) => filtered.filter((t) => t.ym === m).sort((a, b) => a.dateKey.localeCompare(b.dateKey))
 
+  // 금액은 있으나 입·출금일 미입력 → 정산 미반영
+  const exSales = excluded.filter((e) => e.kind === 'sales')
+  const exBuy = excluded.filter((e) => e.kind === 'purchase')
+  const exSalesSum = exSales.reduce((s, e) => s + e.amount, 0)
+  const exBuySum = exBuy.reduce((s, e) => s + e.amount, 0)
+  const [showEx, setShowEx] = useState(false)
+
   return (
     <div className="settle">
       <div className="settle-head">
@@ -143,6 +150,26 @@ export default function Settlement({ transactions }) {
         <div className="card"><div className="card-n green">{won(totalSales - totalPurchase)}</div><div className="card-label">순액 (매출−매입)</div></div>
         <div className="card"><div className="card-n sm-n">{from} ~ {to}</div><div className="card-label">기간 ({months.length}개월)</div></div>
       </section>
+
+      {excluded.length > 0 && (
+        <div className="ex-notice">
+          <div className="ex-head" onClick={() => setShowEx(!showEx)}>
+            <strong>입·출금일 미입력으로 정산 미반영</strong>{' '}
+            매출 {exSales.length}건 {won(exSalesSum)} · 매입 {exBuy.length}건 {won(exBuySum)}
+            <span className="ex-toggle">{showEx ? '접기 ▾' : '자세히 ▸'}</span>
+          </div>
+          {showEx && (
+            <ul className="ex-list">
+              {excluded.map((e, i) => (
+                <li key={i}>
+                  <span className={`kind ${e.kind}`}>{e.kind === 'sales' ? '매출' : '매입'}</span>
+                  {e.code} · {e.partner || '-'} · {e.label} · {won(e.amount)}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
 
       <section className="panel">
         <div className="panel-title">월별 추이 (매출 vs 매입)</div>
