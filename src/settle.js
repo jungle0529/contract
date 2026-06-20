@@ -45,6 +45,13 @@ export function toYM(s) {
   return `${m[1]}-${m[2].padStart(2, '0')}`
 }
 
+// 'YYYY-M-D...' → 'YYYY-MM-DD' (정렬·범위비교용 정규화)
+function toDateKey(s) {
+  const m = (s || '').trim().match(/^(\d{4})-(\d{1,2})-(\d{1,2})/)
+  if (!m) return null
+  return `${m[1]}-${m[2].padStart(2, '0')}-${m[3].padStart(2, '0')}`
+}
+
 export function buildTransactions(sHeader, sRows, bHeader, bRows) {
   const tx = []
   for (const r of sRows || []) {
@@ -55,6 +62,7 @@ export function buildTransactions(sHeader, sRows, bHeader, bRows) {
       if (!ym || amount <= 0) continue
       tx.push({
         ym,
+        dateKey: toDateKey(date),
         date,
         amount,
         kind: 'sales',
@@ -75,6 +83,7 @@ export function buildTransactions(sHeader, sRows, bHeader, bRows) {
       if (!ym || amount <= 0) continue
       tx.push({
         ym,
+        dateKey: toDateKey(date),
         date,
         amount,
         kind: 'purchase',

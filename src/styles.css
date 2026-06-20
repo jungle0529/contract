@@ -74,6 +74,40 @@ body {
 .card-n.blue { color: var(--accent); }
 .card-n.orange { color: #d9822b; }
 .card-n.green { color: var(--done); }
+.card-n.sm-n { font-size: 16px; }
+
+/* 달력 범위 선택기 */
+.cal-pop {
+  align-self: flex-start;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  gap: 28px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+}
+.cal-head { display: flex; align-items: center; gap: 6px; justify-content: center; margin-bottom: 10px; }
+.cal-title { font-weight: 600; font-size: 14px; }
+.cal-nav { border: none; background: transparent; cursor: pointer; color: #6b7280; font-size: 15px; padding: 2px 6px; }
+.cal-nav:hover { color: var(--text); }
+.cal-grid { display: grid; grid-template-columns: repeat(7, 34px); gap: 2px; }
+.cal-wd { text-align: center; font-size: 12px; color: var(--muted); height: 26px; line-height: 26px; }
+.cal-wd.sun { color: #e0433b; }
+.cal-wd.sat { color: var(--accent); }
+.cal-day {
+  height: 34px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--text);
+  border-radius: 6px;
+}
+.cal-day.out { color: #c4c9d1; }
+.cal-day:hover { background: #eef1f5; }
+.cal-day.inrange { background: #e8f0fe; border-radius: 0; }
+.cal-day.end { background: var(--accent); color: #fff; border-radius: 6px; }
 
 .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px; }
 .panel-title { font-weight: 600; font-size: 14px; }
