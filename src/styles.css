@@ -433,3 +433,64 @@ tbody tr:hover .sticky-col4 { background: #f8fafc; }
   white-space: nowrap;
 }
 .buy-table .progress { min-width: 0; }
+
+/* ───────────── 모바일 최적화 (≤700px) ───────────── */
+@media (max-width: 700px) {
+  body { overflow: auto; height: auto; }
+  .app {
+    height: auto;
+    min-height: 100vh;
+    padding: 12px;
+  }
+
+  .topbar { flex-wrap: wrap; gap: 10px; align-items: center; }
+  .topbar-right { margin-left: auto; }
+  .tab { padding: 7px 14px; font-size: 13px; }
+
+  .settle-head h1 { font-size: 18px; }
+
+  /* 필터: 전부 세로 가득 채우기 */
+  .filters, .settle-filters { gap: 8px; }
+  .filters .input, .filters .select { width: 100%; min-width: 0; }
+  .settle-filters .chip { flex: 1 1 30%; text-align: center; }
+  .settle-filters .input, .settle-filters .select { width: 100%; min-width: 0; }
+
+  /* 정산 카드 2열 */
+  .settle-cards { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  .card { padding: 12px 14px; }
+  .card-n { font-size: 19px; }
+  .card-n.sm-n { font-size: 13px; }
+
+  .panel { padding: 12px; }
+
+  /* 정산 영역은 페이지 스크롤에 맡김 */
+  .settle { flex: none; min-height: 0; overflow: visible; }
+
+  /* 표: 세로는 페이지 스크롤, 가로만 표 안에서 스크롤. 헤더는 화면 상단 고정 */
+  .table-wrap { max-height: none; overflow-x: auto; overflow-y: visible; }
+
+  /* 계약 단계: 좌측 고정열 해제(전체 가로 스크롤) + 폭 슬림 */
+  .sticky-col, .sticky-col2, .sticky-col3, .sticky-col4 {
+    position: static;
+    box-shadow: none;
+  }
+  .sticky-col { width: 80px; min-width: 80px; max-width: 80px; }
+  .sticky-col2 { width: 150px; min-width: 150px; max-width: 150px; }
+  .sticky-col3 { width: 66px; min-width: 66px; max-width: 66px; }
+  .sticky-col4 { width: 54px; min-width: 54px; max-width: 54px; }
+  thead .sticky-col, thead .sticky-col2, thead .sticky-col3, thead .sticky-col4 { z-index: 3; }
+  .name { max-width: 150px; }
+  .stage-table th, .stage-table td { padding: 7px 8px; }
+
+  /* 가로 차트 라벨 슬림 */
+  .hlabel { width: 50px; font-size: 11px; }
+
+  /* 달력: 두 달을 세로로 */
+  .cal-pop { flex-direction: column; gap: 14px; padding: 12px; }
+  .cal-grid { grid-template-columns: repeat(7, 1fr); }
+  .cal-day { height: 38px; }
+
+  /* 측정 제외 안내 줄바꿈 */
+  .xx-notice { flex-wrap: wrap; }
+  .xx-clear { margin-left: 0; }
+}
